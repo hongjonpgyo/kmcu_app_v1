@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
+void main() => runApp(KmcuApp());
+
+class KmcuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,28 +14,55 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: KMCUHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key}) : super(key: key);
+class KMCUHomePage extends StatefulWidget {
+  KMCUHomePage({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _KMCUHomePageState createState() => _KMCUHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _KMCUHomePageState extends State<KMCUHomePage> {
+  late WebViewController _controller;
+
+  final Completer<WebViewController> _completerController = Completer<WebViewController>();
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: WebView(
-          initialUrl: 'https://www.kmcu.ac.kr/kr/index.php?ref=1',
-          javascriptMode: JavascriptMode.unrestricted,
-        ),
-      ),
+  void initState() {
+    super.initState();
+    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return Container(
+        child: SafeArea(
+            child:WillPopScope(
+              onWillPop: () => _goBack(context),
+              child: WebView(
+                onWebViewCreated: (WebViewController webViewController) {
+                  _completerController.future.then((value) => _controller = value);
+                  _completerController.complete(webViewController);
+                },
+                initialUrl: "https://www.kmcu.ac.kr/kr/index.php?ref=1",
+                javascriptMode: JavascriptMode.unrestricted,
+              ),
+            )
+        )
     );
   }
+
+  Future<bool> _goBack(BuildContext context) async{
+    if(await _controller.canGoBack()){
+      _controller.goBack();
+      return Future.value(false);
+    }else{
+      return Future.value(true);
+    }
+  }
+
 }
