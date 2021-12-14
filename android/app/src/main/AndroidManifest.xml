@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.kmcu_app">
+   <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="kmcu_app"
+        android:label="계명문화대학교"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <activity
